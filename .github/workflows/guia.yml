@@ -1,0 +1,59 @@
+name: Gerar guia
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 04:00 em Brasilia
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  guia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: iptv-org/epg
+          path: epg
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar o grabber
+        working-directory: epg
+        run: npm install --no-audit --no-fund
+
+      - name: Montar lista de canais
+        run: python3 gerar_channels.py > epg/custom.channels.xml
+
+      - name: Baixar a programacao
+        working-directory: epg
+        run: npm run grab --- --channels=custom.channels.xml --output=guia.xml --days=2 --maxConnections=10
+
+      - name: Preparar site
+        run: |
+          mkdir -p public
+          cp epg/guia.xml public/guia.xml
+          gzip -9 -k public/guia.xml
+          echo "canais: $(grep -c '<channel ' public/guia.xml)  programas: $(grep -c '<programme ' public/guia.xml)"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
