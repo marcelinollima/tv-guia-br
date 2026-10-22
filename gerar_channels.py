@@ -16,6 +16,13 @@ GUIAS = "https://iptv-org.github.io/api/guides.json"
 PREFERENCIA = ["i.mjh.nz", "pluto.tv", "mi.tv", "plex.tv", "meuguia.tv"]
 
 
+# canais que o iptv-org so' mapeia no meuguia.tv (quebrado); o mi.tv tem pagina para eles
+EXTRAS = {
+    "Band.br@SD": {"site": "mi.tv", "lang": "pt", "site_id": "br#band", "site_name": "Band"},
+    "Combate.br@SD": {"site": "mi.tv", "lang": "pt", "site_id": "br#combate", "site_name": "Combate"},
+}
+
+
 def baixar(url):
     return urllib.request.urlopen(url, timeout=60).read().decode("utf-8")
 
@@ -44,6 +51,8 @@ def main():
     achados = 0
     for xmltv_id in dict.fromkeys(ids):
         g = por_canal.get(xmltv_id) or por_canal.get(xmltv_id.split("@")[0])
+        if xmltv_id in EXTRAS and (not g or g["site"] == "meuguia.tv"):
+            g = EXTRAS[xmltv_id]
         if not g:
             continue
         achados += 1
