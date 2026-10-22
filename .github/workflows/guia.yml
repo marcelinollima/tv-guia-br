@@ -42,7 +42,10 @@ jobs:
 
       - name: Baixar a programacao
         working-directory: epg
-        run: npm run grab --- --channels=custom.channels.xml --output=guia.xml --days=2 --maxConnections=10
+        # i.mjh.nz devolve o XML inteiro do Pluto a cada pedido; com muitas conexoes o Node estoura 4 GB
+        env:
+          NODE_OPTIONS: --max-old-space-size=12288
+        run: npm run grab --- --channels=custom.channels.xml --output=guia.xml --days=2 --maxConnections=3
 
       - name: Preparar site
         run: |

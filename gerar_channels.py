@@ -12,7 +12,8 @@ LISTA = "https://iptv-org.github.io/iptv/countries/br.m3u"
 GUIAS = "https://iptv-org.github.io/api/guides.json"
 
 # quando o canal aparece em mais de um site, fica o primeiro desta ordem
-PREFERENCIA = ["i.mjh.nz", "pluto.tv", "meuguia.tv", "mi.tv", "plex.tv"]
+# (meuguia.tv vai por ultimo: em 22/10/2026 devolvia "Invalid time value" em todos os canais)
+PREFERENCIA = ["i.mjh.nz", "pluto.tv", "mi.tv", "plex.tv", "meuguia.tv"]
 
 
 def baixar(url):
